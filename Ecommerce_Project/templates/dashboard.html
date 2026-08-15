@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard — ShopZone</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+
+<body>
+
+    <!-- HEADER -->
+    <header>
+        <div class="logo">🛒 ShopZone</div>
+        <nav>
+            <a href="/dashboard" class="active">Dashboard</a>
+            <a href="/products">Products</a>
+            <a href="/cart">Cart</a>
+            <a href="/logout" class="btn-nav">Logout</a>
+        </nav>
+    </header>
+
+
+    <!-- HERO / WELCOME -->
+    <section class="hero" style="min-height: 240px;">
+        <div>
+            <h1>Welcome, {{ user_name }}! 👋</h1>
+            <p>What would you like to do today?</p>
+            <a href="/products" class="btn">Browse Products →</a>
+        </div>
+    </section>
+
+
+    <!-- DASHBOARD CARDS -->
+    <section class="products">
+
+        <h2>Quick Actions</h2>
+
+        <div class="dashboard-grid">
+
+            <a href="/products" class="dashboard-card">
+                <div class="icon">🛍️</div>
+                <h3>Browse Products</h3>
+                <p>Explore our full product catalogue</p>
+            </a>
+
+            <a href="/cart" class="dashboard-card">
+                <div class="icon">🛒</div>
+                <h3>My Cart</h3>
+                <p>View and manage your shopping cart</p>
+            </a>
+
+            <a href="#" class="dashboard-card">
+                <div class="icon">📦</div>
+                <h3>My Orders</h3>
+                <p>Track your order history</p>
+            </a>
+
+            <a href="#" class="dashboard-card">
+                <div class="icon">⭐</div>
+                <h3>My Reviews</h3>
+                <p>Manage your product reviews</p>
+            </a>
+
+        </div>
+
+    </section>
+
+
+    <!-- FOOTER -->
+    <footer>
+        <p>© 2026 <span>ShopZone</span>. All Rights Reserved.</p>
+    </footer>
+
+</body>
+
+</html>

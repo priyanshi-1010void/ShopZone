@@ -1,0 +1,203 @@
+{% extends "base.html" %}
+
+{% block title %}{{ product.name }} — ShopZone{% endblock %}
+
+{% block content %}
+<div class="section-wrapper">
+
+    <!-- BREADCRUMBS -->
+    <div style="font-size: 12px; color: var(--text-muted); margin-bottom: 16px;">
+        <a href="/" style="color: var(--text-muted); text-decoration: none;">Home</a> /
+        <a href="/products?category={{ product.category_id }}" style="color: var(--text-muted); text-decoration: none;">{{ product.category.category_name }}</a> /
+        <span style="color: var(--text); font-weight: 600;">{{ product.name }}</span>
+    </div>
+
+    <!-- MAIN PRODUCT VIEW -->
+    <div class="product-view-layout">
+        <!-- LEFT: GALLERY & BADGES -->
+        <div class="view-gallery">
+            <div class="gallery-main">
+                {{ product.image or '🛍️' }}
+            </div>
+
+            <div class="trust-badges-grid">
+                <div class="trust-badge-item">
+                    <span>⚡</span> <span>100% Genuine</span>
+                </div>
+                <div class="trust-badge-item">
+                    <span>📦</span> <span>7 Days Returns</span>
+                </div>
+                <div class="trust-badge-item">
+                    <span>🛡️</span> <span>1 Year Warranty</span>
+                </div>
+                <div class="trust-badge-item">
+                    <span>💳</span> <span>Pay on Delivery</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- RIGHT: DETAILS & ACTIONS -->
+        <div class="view-info">
+            <span class="badge-assured" style="margin-bottom: 8px;">ShopZone Assured</span>
+            <h1 class="view-title">{{ product.name }}</h1>
+
+            <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 14px;">
+                <span class="rating-chip" style="font-size: 12px; padding: 3px 8px;">★ {{ product.avg_rating }}</span>
+                <span style="font-size: 12px; color: var(--text-muted);">{{ product.review_count }} ratings</span>
+                <span style="color: var(--border);">|</span>
+                <a href="{{ url_for('add_to_compare', product_id=product.product_id) }}" style="color: var(--text-secondary); font-weight: 600; text-decoration: none; font-size: 12px;">
+                    Compare
+                </a>
+            </div>
+
+            <!-- PRICE PANEL -->
+            <div class="view-price-panel">
+                <div class="view-price-main">
+                    <span class="view-price">₹{{ "{:,.0f}".format(product.price) }}</span>
+                    <span class="view-mrp">₹{{ "{:,.0f}".format(product.original_price) }}</span>
+                    <span class="view-discount">{{ product.discount_percent }}% OFF</span>
+                </div>
+                <div class="view-savings-note">
+                    Complimentary doorstep delivery included.
+                </div>
+            </div>
+
+            <!-- STOCK STATUS -->
+            <div>
+                {% if product.stock > 10 %}
+                    <span class="stock-tag in-stock">✓ In Stock</span>
+                {% elif product.stock > 0 %}
+                    <span class="stock-tag low-stock">{{ product.stock }} units remaining</span>
+                {% else %}
+                    <span class="stock-tag out-stock">Currently Out of Stock</span>
+                {% endif %}
+            </div>
+
+            <p style="color: var(--text-secondary); font-size: 13px; line-height: 1.6; margin-bottom: 20px;">
+                {{ product.description }}
+            </p>
+
+            <!-- ADD TO CART & BUY NOW FORM -->
+            <form action="{{ url_for('add_to_cart', product_id=product.product_id) }}" method="POST">
+                <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 20px;">
+                    <label style="font-weight: 600; font-size: 13px;">Quantity:</label>
+                    <div class="qty-stepper">
+                        <button type="button" class="qty-btn qty-minus">−</button>
+                        <input type="number" name="quantity" class="qty-input" value="1" min="1" max="{{ product.stock or 1 }}" readonly>
+                        <button type="button" class="qty-btn qty-plus">+</button>
+                    </div>
+                </div>
+
+                <div class="detail-actions-bar">
+                    <button type="submit" class="btn btn-lg" style="flex: 1;" {% if product.stock == 0 %}disabled style="opacity: 0.5;"{% endif %}>
+                        Add to Bag
+                    </button>
+                    <button type="submit" name="buy_now" value="1" class="btn btn-secondary btn-lg" style="flex: 1;" {% if product.stock == 0 %}disabled style="opacity: 0.5;"{% endif %}>
+                        Buy Now
+                    </button>
+                </div>
+            </form>
+
+            <div style="border-top: 1px solid var(--border); padding-top: 14px; margin-top: auto; font-size: 12px; color: var(--text-muted); display: flex; gap: 16px;">
+                <span>Delivery: 2 - 3 Days</span>
+                <span>•</span>
+                <span>7 Days Return Window</span>
+                <span>•</span>
+                <span>Secure Checkout</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- CUSTOMER REVIEWS & RATINGS -->
+    <div class="reviews-container">
+        <div class="section-header">
+            <h2 class="section-title">Customer Ratings & Reviews</h2>
+            <span style="font-size: 13px; font-weight: 700; color: var(--text);">{{ product.avg_rating }} / 5.0</span>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 28px; margin-bottom: 24px;">
+            <!-- RATING BREAKDOWN -->
+            <div style="background: var(--bg-subtle); border: 1px solid var(--border); border-radius: var(--radius); padding: 18px;">
+                <h4 style="font-size: 13px; font-weight: 700; margin-bottom: 12px;">Rating Breakdown</h4>
+                {% for star in [5, 4, 3, 2, 1] %}
+                <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 6px; font-size: 12px;">
+                    <span style="width: 42px; font-weight: 600;">{{ star }} Star</span>
+                    <div style="flex: 1; height: 6px; background: var(--bg-hover); border-radius: 3px; overflow: hidden;">
+                        <div style="width: {{ (ratings_count[star] / (product.reviews|length or 1)) * 100 }}%; height: 100%; background: var(--primary);"></div>
+                    </div>
+                    <span style="width: 20px; color: var(--text-muted); text-align: right;">{{ ratings_count[star] }}</span>
+                </div>
+                {% endfor %}
+            </div>
+
+            <!-- SUBMIT NEW REVIEW -->
+            <div style="background: var(--bg-subtle); border: 1px solid var(--border); border-radius: var(--radius); padding: 18px;">
+                <h4 style="font-size: 13px; font-weight: 700; margin-bottom: 10px;">Write a Customer Review</h4>
+                {% if logged_user_name %}
+                <form action="{{ url_for('add_review', product_id=product.product_id) }}" method="POST">
+                    <div style="margin-bottom: 8px;">
+                        <label style="font-size: 11px; font-weight: 700; display: block; margin-bottom: 3px;">Rating</label>
+                        <select name="rating" class="sort-select" style="width: 100%; background: #ffffff;">
+                            <option value="5">5 Stars — Excellent</option>
+                            <option value="4">4 Stars — Very Good</option>
+                            <option value="3">3 Stars — Average</option>
+                            <option value="2">2 Stars — Below Expectations</option>
+                            <option value="1">1 Star — Poor</option>
+                        </select>
+                    </div>
+                    <div style="margin-bottom: 10px;">
+                        <label style="font-size: 11px; font-weight: 700; display: block; margin-bottom: 3px;">Feedback</label>
+                        <textarea name="comment" class="coupon-input" rows="2" style="width: 100%; font-size: 12px;" placeholder="Share your experience..." required></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-sm">Submit Review</button>
+                </form>
+                {% else %}
+                <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 10px;">Sign in to leave a product review.</p>
+                <a href="/login" class="btn btn-sm btn-outline">Sign In</a>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- REVIEWS LIST -->
+        {% if reviews %}
+            {% for r in reviews %}
+            <div class="review-item">
+                <div class="review-user-row">
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        <span class="rating-chip">★ {{ r.rating }}</span>
+                        <span class="review-author">{{ r.user.name }}</span>
+                        <span style="background: var(--bg-subtle); color: var(--text-secondary); border: 1px solid var(--border); font-size: 10px; font-weight: 600; padding: 1px 6px; border-radius: var(--radius-sm);">Verified</span>
+                    </div>
+                    <span class="review-date">{{ r.review_date.strftime('%d %b %Y') if r.review_date else 'Recently' }}</span>
+                </div>
+                <p style="font-size: 13px; color: var(--text); margin-top: 4px;">{{ r.comment }}</p>
+            </div>
+            {% endfor %}
+        {% else %}
+            <p style="color: var(--text-muted); font-size: 12px; text-align: center; padding: 16px;">No customer reviews submitted yet.</p>
+        {% endif %}
+    </div>
+
+    <!-- RELATED PRODUCTS -->
+    {% if related_products %}
+    <div style="margin-top: 36px;">
+        <h2 class="section-title" style="margin-bottom: 16px;">Similar Products</h2>
+        <div class="product-grid">
+            {% for rel in related_products %}
+            <div class="product-card">
+                <span class="badge-discount">{{ rel.discount_percent }}% OFF</span>
+                <div class="product-img-box">{{ rel.image or '🛍️' }}</div>
+                <a href="{{ url_for('product_detail', product_id=rel.product_id) }}" class="product-title">{{ rel.name }}</a>
+                <div class="price-box">
+                    <span class="price-current">₹{{ "{:,.0f}".format(rel.price) }}</span>
+                    <span class="price-mrp">₹{{ "{:,.0f}".format(rel.original_price) }}</span>
+                </div>
+                <a href="{{ url_for('product_detail', product_id=rel.product_id) }}" class="btn btn-sm btn-outline btn-block">View Details</a>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+</div>
+{% endblock %}

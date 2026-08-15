@@ -1,0 +1,198 @@
+{% extends "base.html" %}
+
+{% block title %}ShopZone — Minimalist Online Shopping (Electronics, Fashion, Home & Books){% endblock %}
+
+{% block content %}
+<!-- HERO SECTION (Light & Clean Minimalist) -->
+<section class="hero-slider">
+    <div class="hero-content">
+        <div>
+            <span class="hero-badge">Curated Collection 2026</span>
+            <h1 class="hero-title">Essential Products for Modern Living.</h1>
+            <p class="hero-desc">
+                Discover a carefully selected catalog of smartphones, premium audio, relaxed fashion, and smart home essentials with fast, reliable delivery.
+            </p>
+            <div class="hero-actions">
+                <a href="/products" class="btn btn-lg">Explore Catalog →</a>
+                <a href="/products?category=1" class="btn btn-secondary btn-lg">Electronics</a>
+            </div>
+        </div>
+
+        <div class="hero-features">
+            <div class="hero-feature-card">
+                <div class="feature-icon">📦</div>
+                <div class="feature-text">
+                    <h4>Complimentary Delivery</h4>
+                    <p>Free standard delivery over ₹499</p>
+                </div>
+            </div>
+            <div class="hero-feature-card">
+                <div class="feature-icon">🛡️</div>
+                <div class="feature-text">
+                    <h4>Verified Authentic</h4>
+                    <p>100% genuine brand merchandise</p>
+                </div>
+            </div>
+            <div class="hero-feature-card">
+                <div class="feature-icon">🔄</div>
+                <div class="feature-text">
+                    <h4>7-Day Free Returns</h4>
+                    <p>Simple doorstep pickup</p>
+                </div>
+            </div>
+            <div class="hero-feature-card">
+                <div class="feature-icon">💳</div>
+                <div class="feature-text">
+                    <h4>Flexible Payments</h4>
+                    <p>UPI, Cards & Pay on Delivery</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- POPULAR CATEGORIES -->
+<section class="section-wrapper">
+    <div class="section-header">
+        <h2 class="section-title">Shop by Category</h2>
+        <a href="/products" class="section-link">View All Categories →</a>
+    </div>
+
+    <div class="category-grid">
+        <a href="/products?category=1" class="category-card">
+            <div class="category-icon">📱</div>
+            <div class="category-name">Electronics</div>
+            <div class="category-count">Smartphones & Audio</div>
+        </a>
+        <a href="/products?category=2" class="category-card">
+            <div class="category-icon">👗</div>
+            <div class="category-name">Fashion</div>
+            <div class="category-count">Everyday Apparel</div>
+        </a>
+        <a href="/products?category=3" class="category-card">
+            <div class="category-icon">🍳</div>
+            <div class="category-name">Home & Living</div>
+            <div class="category-count">Kitchen & Appliances</div>
+        </a>
+        <a href="/products?category=4" class="category-card">
+            <div class="category-icon">✨</div>
+            <div class="category-name">Personal Care</div>
+            <div class="category-count">Skincare & Wellness</div>
+        </a>
+        <a href="/products?category=5" class="category-card">
+            <div class="category-icon">📚</div>
+            <div class="category-name">Books</div>
+            <div class="category-count">Tech & Academic</div>
+        </a>
+    </div>
+</section>
+
+<!-- LIMITED OFFERS / TRENDING -->
+<section class="section-wrapper">
+    <div class="section-header">
+        <h2 class="section-title">Featured Highlights</h2>
+        <a href="/products" class="section-link">Explore All Products →</a>
+    </div>
+
+    <div class="product-grid">
+        {% for product in trending_products %}
+        <div class="product-card">
+            <span class="badge-discount">{{ product.discount_percent }}% OFF</span>
+            <div class="product-img-box">
+                {{ product.image or '🛍️' }}
+            </div>
+            <span class="badge-assured">ShopZone Assured</span>
+            <a href="{{ url_for('product_detail', product_id=product.product_id) }}" class="product-title">
+                {{ product.name }}
+            </a>
+
+            <div style="display: flex; align-items: center; margin-bottom: 8px;">
+                <span class="rating-chip">★ {{ product.avg_rating }}</span>
+                <span class="rating-reviews">({{ product.review_count }})</span>
+            </div>
+
+            <div class="price-box">
+                <span class="price-current">₹{{ "{:,.0f}".format(product.price) }}</span>
+                <span class="price-mrp">₹{{ "{:,.0f}".format(product.original_price) }}</span>
+            </div>
+
+            <div class="delivery-chip">
+                <span class="delivery-free">Free Delivery</span> • 2-3 Days
+            </div>
+
+            <div class="card-actions">
+                <form action="{{ url_for('add_to_cart', product_id=product.product_id) }}" method="POST">
+                    <button type="submit" class="btn btn-sm btn-block">
+                        Add to Bag
+                    </button>
+                </form>
+                <a href="{{ url_for('add_to_compare', product_id=product.product_id) }}" class="btn-card-compare" title="Add to Comparison">
+                    Compare
+                </a>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</section>
+
+<!-- BESTSELLERS GRID -->
+<section class="section-wrapper">
+    <div class="section-header">
+        <h2 class="section-title">All Products</h2>
+        <a href="/products" class="section-link">View Full Catalog ({{ featured_products|length }}+) →</a>
+    </div>
+
+    <div class="product-grid">
+        {% for product in featured_products %}
+        <div class="product-card">
+            <span class="badge-discount">{{ product.discount_percent }}% OFF</span>
+            <div class="product-img-box">
+                {{ product.image or '🛍️' }}
+            </div>
+            <span class="badge-assured">ShopZone Assured</span>
+            <a href="{{ url_for('product_detail', product_id=product.product_id) }}" class="product-title">
+                {{ product.name }}
+            </a>
+
+            <div style="display: flex; align-items: center; margin-bottom: 8px;">
+                <span class="rating-chip">★ {{ product.avg_rating }}</span>
+                <span class="rating-reviews">({{ product.review_count }})</span>
+            </div>
+
+            <div class="price-box">
+                <span class="price-current">₹{{ "{:,.0f}".format(product.price) }}</span>
+                <span class="price-mrp">₹{{ "{:,.0f}".format(product.original_price) }}</span>
+            </div>
+
+            <div class="delivery-chip">
+                <span class="delivery-free">Free Delivery</span>
+            </div>
+
+            <div class="card-actions">
+                <form action="{{ url_for('add_to_cart', product_id=product.product_id) }}" method="POST">
+                    <button type="submit" class="btn btn-sm btn-block">
+                        Add to Bag
+                    </button>
+                </form>
+                <a href="{{ url_for('add_to_compare', product_id=product.product_id) }}" class="btn-card-compare" title="Add to Comparison">
+                    Compare
+                </a>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</section>
+
+<!-- MINIMAL PROMOTIONAL STRIP -->
+<section class="section-wrapper">
+    <div style="background: #ffffff; border: 1px solid var(--border); padding: 28px 36px; border-radius: var(--radius-lg); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px; box-shadow: var(--shadow-subtle);">
+        <div>
+            <h3 style="font-size: 18px; font-weight: 800; color: var(--text); margin-bottom: 4px;">Exclusive Discount: Save 20% on First Purchase</h3>
+            <p style="font-size: 13px; color: var(--text-secondary);">Apply coupon code <strong>SHOPZONE20</strong> at checkout to apply savings automatically.</p>
+        </div>
+        <div>
+            <a href="/products" class="btn">Explore All Offers →</a>
+        </div>
+    </div>
+</section>
+{% endblock %}

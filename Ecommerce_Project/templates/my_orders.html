@@ -1,0 +1,126 @@
+{% extends "base.html" %}
+
+{% block title %}My Orders — ShopZone{% endblock %}
+
+{% block content %}
+<div class="section-wrapper" style="max-width: 960px; margin: 28px auto;">
+
+    <div class="section-header" style="margin-bottom: 18px;">
+        <div>
+            <h1 class="section-title">My Orders</h1>
+            <p style="font-size: 13px; color: var(--text-muted); margin-top: 2px;">Track current shipments, review past receipts and process returns</p>
+        </div>
+        <a href="/products" class="btn btn-sm btn-secondary">Shop More →</a>
+    </div>
+
+    <!-- STATUS FILTER PILLS -->
+    <div style="display: flex; gap: 6px; margin-bottom: 20px; overflow-x: auto;">
+        <a href="/my-orders" class="btn btn-sm {% if status_filter == 'all' %}btn-secondary{% else %}btn-outline{% endif %}">
+            All ({{ orders|length }})
+        </a>
+        <a href="/my-orders?status=Placed" class="btn btn-sm {% if status_filter == 'Placed' %}btn-secondary{% else %}btn-outline{% endif %}">
+            Placed
+        </a>
+        <a href="/my-orders?status=Processing" class="btn btn-sm {% if status_filter == 'Processing' %}btn-secondary{% else %}btn-outline{% endif %}">
+            Processing
+        </a>
+        <a href="/my-orders?status=Shipped" class="btn btn-sm {% if status_filter == 'Shipped' %}btn-secondary{% else %}btn-outline{% endif %}">
+            Shipped
+        </a>
+        <a href="/my-orders?status=Delivered" class="btn btn-sm {% if status_filter == 'Delivered' %}btn-secondary{% else %}btn-outline{% endif %}">
+            Delivered
+        </a>
+        <a href="/my-orders?status=Cancelled" class="btn btn-sm {% if status_filter == 'Cancelled' %}btn-secondary{% else %}btn-outline{% endif %}">
+            Cancelled
+        </a>
+    </div>
+
+    <!-- ORDERS LIST -->
+    {% if orders %}
+        <div style="display: flex; flex-direction: column; gap: 14px;">
+            {% for order in orders %}
+            <div style="background: #ffffff; border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 20px; box-shadow: var(--shadow-subtle);">
+                <!-- ORDER TOP BAR -->
+                <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); padding-bottom: 12px; margin-bottom: 14px; flex-wrap: wrap; gap: 10px;">
+                    <div style="display: flex; gap: 20px; font-size: 12px;">
+                        <div>
+                            <span style="color: var(--text-muted);">ORDER PLACED:</span>
+                            <div style="font-weight: 600;">{{ order.order_date.strftime('%d %b %Y') if order.order_date else 'Recently' }}</div>
+                        </div>
+                        <div>
+                            <span style="color: var(--text-muted);">TOTAL:</span>
+                            <div style="font-weight: 700; color: var(--text);">₹{{ "{:,.2f}".format(order.total_amount) }}</div>
+                        </div>
+                        <div>
+                            <span style="color: var(--text-muted);">SHIP TO:</span>
+                            <div style="font-weight: 600;">{{ order.user.name }}</div>
+                        </div>
+                    </div>
+
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        <span class="status-pill status-{{ order.status.replace(' ', '_') }}">
+                            {{ order.status }}
+                        </span>
+                        <span style="font-size: 12px; color: var(--text-muted);">#SZ-{{ order.order_id }}</span>
+                    </div>
+                </div>
+
+                <!-- ITEMS LIST PREVIEW -->
+                <div style="display: flex; flex-direction: column; gap: 10px; margin-bottom: 14px;">
+                    {% for item in order.items %}
+                    <div style="display: flex; align-items: center; justify-content: space-between;">
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            <div style="font-size: 28px; background: var(--bg-subtle); width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; border-radius: var(--radius-sm);">
+                                {{ item.product.image or '🛍️' }}
+                            </div>
+                            <div>
+                                <a href="{{ url_for('product_detail', product_id=item.product.product_id) }}" style="font-weight: 600; font-size: 13px; color: var(--text); text-decoration: none;">
+                                    {{ item.product.name }}
+                                </a>
+                                <div style="font-size: 11px; color: var(--text-muted);">
+                                    Qty: {{ item.quantity }} × ₹{{ "{:,.0f}".format(item.price) }}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div>
+                            <a href="{{ url_for('product_detail', product_id=item.product.product_id) }}" class="btn btn-sm btn-outline">
+                                View Product
+                            </a>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+
+                <!-- ORDER FOOTER ACTIONS -->
+                <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--border); padding-top: 12px; flex-wrap: wrap; gap: 10px;">
+                    <div style="font-size: 12px; color: var(--text-muted);">
+                        {% if order.status == 'Delivered' %}
+                            ✓ Delivered successfully
+                        {% elif order.status == 'Cancelled' %}
+                            ✕ Order was cancelled
+                        {% else %}
+                            Estimated Delivery: 2-3 business days
+                        {% endif %}
+                    </div>
+
+                    <div style="display: flex; gap: 8px;">
+                        <a href="{{ url_for('order_tracking', order_id=order.order_id) }}" class="btn btn-sm">
+                            Track Order →
+                        </a>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <!-- EMPTY ORDERS -->
+        <div style="background: #ffffff; border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 50px 20px; text-align: center; box-shadow: var(--shadow-subtle);">
+            <h2 style="font-size: 18px; font-weight: 700; margin-bottom: 6px;">No Orders Found</h2>
+            <p style="color: var(--text-muted); font-size: 13px; margin-bottom: 20px;">You have no purchases recorded under this status.</p>
+            <a href="/products" class="btn">Explore Catalog →</a>
+        </div>
+    {% endif %}
+
+</div>
+{% endblock %}

@@ -1,0 +1,103 @@
+{% extends "admin/admin_base.html" %}
+
+{% block title %}Order Management — ShopZone Admin{% endblock %}
+
+{% block content %}
+<div class="admin-header">
+    <div>
+        <h1 class="admin-title">Customer Orders</h1>
+        <p style="color: var(--text-muted); font-size: 13px; margin-top: 2px;">Track delivery milestones, verify payments and update fulfillment status</p>
+    </div>
+</div>
+
+<!-- STATUS FILTERS -->
+<div style="display: flex; gap: 8px; margin-bottom: 20px; overflow-x: auto;">
+    <a href="/admin/orders" class="btn btn-sm {% if not current_status %}btn-secondary{% else %}btn-outline{% endif %}">
+        All ({{ orders|length }})
+    </a>
+    <a href="/admin/orders?status=Placed" class="btn btn-sm {% if current_status == 'Placed' %}btn-secondary{% else %}btn-outline{% endif %}">
+        Placed
+    </a>
+    <a href="/admin/orders?status=Processing" class="btn btn-sm {% if current_status == 'Processing' %}btn-secondary{% else %}btn-outline{% endif %}">
+        Processing
+    </a>
+    <a href="/admin/orders?status=Shipped" class="btn btn-sm {% if current_status == 'Shipped' %}btn-secondary{% else %}btn-outline{% endif %}">
+        Shipped
+    </a>
+    <a href="/admin/orders?status=Delivered" class="btn btn-sm {% if current_status == 'Delivered' %}btn-secondary{% else %}btn-outline{% endif %}">
+        Delivered
+    </a>
+    <a href="/admin/orders?status=Cancelled" class="btn btn-sm {% if current_status == 'Cancelled' %}btn-secondary{% else %}btn-outline{% endif %}">
+        Cancelled
+    </a>
+</div>
+
+<!-- ORDERS TABLE -->
+<div class="admin-card">
+    <table class="admin-table">
+        <thead>
+            <tr>
+                <th>Order ID</th>
+                <th>Customer</th>
+                <th>Destination</th>
+                <th>Items Summary</th>
+                <th>Total</th>
+                <th>Status</th>
+                <th>Fulfillment Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for o in orders %}
+            <tr>
+                <td style="font-weight: 700;">#SZ-{{ o.order_id }}</td>
+                <td>
+                    <div style="font-weight: 600;">{{ o.user.name }}</div>
+                    <div style="font-size: 11px; color: var(--text-muted);">{{ o.user.email }}</div>
+                </td>
+                <td style="font-size: 12px; max-width: 200px;">
+                    {% if o.address %}
+                    <div>{{ o.address.address_line }}, {{ o.address.city }}</div>
+                    <span style="color: var(--text-muted);">Pin: {{ o.address.pincode }}</span>
+                    {% else %}
+                    <span>Standard Address</span>
+                    {% endif %}
+                </td>
+                <td>
+                    <div style="display: flex; flex-direction: column; gap: 2px;">
+                        {% for itm in o.items %}
+                        <span style="font-size: 12px;">{{ itm.quantity }}x {{ itm.product.name }}</span>
+                        {% endfor %}
+                    </div>
+                </td>
+                <td style="font-weight: 800; font-size: 14px;">
+                    ₹{{ "{:,.2f}".format(o.total_amount) }}
+                </td>
+                <td>
+                    <span class="status-pill status-{{ o.status.replace(' ', '_') }}">
+                        {{ o.status }}
+                    </span>
+                </td>
+                <td>
+                    <form action="{{ url_for('admin_update_order_status', order_id=o.order_id) }}" method="POST" style="display: flex; gap: 6px;">
+                        <select name="status" class="sort-select" style="font-size: 12px; padding: 4px 8px;">
+                            <option value="Placed" {% if o.status == 'Placed' %}selected{% endif %}>Placed</option>
+                            <option value="Processing" {% if o.status == 'Processing' %}selected{% endif %}>Processing</option>
+                            <option value="Shipped" {% if o.status == 'Shipped' %}selected{% endif %}>Shipped</option>
+                            <option value="Delivered" {% if o.status == 'Delivered' %}selected{% endif %}>Delivered</option>
+                            <option value="Cancelled" {% if o.status == 'Cancelled' %}selected{% endif %}>Cancelled</option>
+                        </select>
+                        <button type="submit" class="btn btn-sm" style="padding: 4px 8px; font-size: 11px;">Update</button>
+                    </form>
+                </td>
+            </tr>
+            {% else %}
+            <tr>
+                <td colspan="7" style="text-align: center; color: var(--text-muted); padding: 24px;">
+                    No orders matching status: <strong>{{ current_status or 'All' }}</strong>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

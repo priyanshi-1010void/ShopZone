@@ -1,0 +1,199 @@
+{% extends "base.html" %}
+
+{% block title %}Checkout — ShopZone{% endblock %}
+
+{% block content %}
+<div class="section-wrapper" style="margin-top: 20px;">
+
+    <div class="section-header" style="margin-bottom: 20px;">
+        <h1 class="section-title">Checkout</h1>
+        <a href="/cart" class="section-link">← Return to Cart</a>
+    </div>
+
+    <form action="/place-order" method="POST" id="checkoutForm">
+        <div class="cart-grid-layout" style="margin-top: 0;">
+
+            <!-- LEFT: ADDRESS & PAYMENT SELECTION -->
+            <div>
+                <!-- STEP 1: DELIVERY ADDRESS -->
+                <div class="cart-items-card" style="margin-bottom: 20px;">
+                    <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 14px; border-bottom: 1px solid var(--border); padding-bottom: 10px;">
+                        <span style="background: var(--primary); color: #ffffff; width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 12px;">1</span>
+                        <h3 style="font-size: 16px; font-weight: 800;">Delivery Destination</h3>
+                    </div>
+
+                    {% if addresses %}
+                    <div class="address-grid">
+                        {% for addr in addresses %}
+                        <label class="address-card {% if loop.first %}selected{% endif %}" id="card-addr-{{ addr.address_id }}">
+                            <div style="display: flex; align-items: flex-start; gap: 10px;">
+                                <input type="radio" name="address_id" value="{{ addr.address_id }}" {% if loop.first %}checked{% endif %} onchange="toggleAddressOption(this)">
+                                <div>
+                                    <div style="font-weight: 700; font-size: 13px; margin-bottom: 2px;">{{ user.name }}</div>
+                                    <div style="font-size: 12px; color: var(--text-muted); line-height: 1.4;">
+                                        {{ addr.address_line }}, {{ addr.city }}, {{ addr.state }} - <strong>{{ addr.pincode }}</strong>
+                                    </div>
+                                    <div style="font-size: 11px; color: var(--text-muted); margin-top: 4px;">Phone: {{ user.phone or '9876543210' }}</div>
+                                </div>
+                            </div>
+                        </label>
+                        {% endfor %}
+
+                        <label class="address-card" id="card-addr-new">
+                            <div style="display: flex; align-items: flex-start; gap: 10px;">
+                                <input type="radio" name="address_id" value="new" {% if not addresses %}checked{% endif %} onchange="toggleAddressOption(this)">
+                                <div>
+                                    <div style="font-weight: 700; font-size: 13px; color: var(--text);">+ New Address</div>
+                                    <div style="font-size: 11px; color: var(--text-muted);">Ship to a different location</div>
+                                </div>
+                            </div>
+                        </label>
+                    </div>
+                    {% endif %}
+
+                    <!-- NEW ADDRESS FORM INPUTS -->
+                    <div id="newAddressForm" style="{% if addresses %}display: none;{% endif %} background: var(--bg-subtle); border: 1px dashed var(--border); border-radius: var(--radius); padding: 18px; margin-top: 10px;">
+                        <h4 style="font-size: 13px; font-weight: 700; margin-bottom: 12px;">Add New Address</h4>
+                        <div style="margin-bottom: 10px;">
+                            <label style="font-size: 12px; font-weight: 700; display: block; margin-bottom: 4px;">Street Address / Flat No</label>
+                            <input type="text" name="address_line" class="coupon-input" style="width: 100%;" placeholder="Flat 402, Sunshine Heights, MG Road">
+                        </div>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px;">
+                            <div>
+                                <label style="font-size: 12px; font-weight: 700; display: block; margin-bottom: 4px;">City</label>
+                                <input type="text" name="city" class="coupon-input" style="width: 100%;" placeholder="Mumbai">
+                            </div>
+                            <div>
+                                <label style="font-size: 12px; font-weight: 700; display: block; margin-bottom: 4px;">State</label>
+                                <input type="text" name="state" class="coupon-input" style="width: 100%;" placeholder="Maharashtra">
+                            </div>
+                            <div>
+                                <label style="font-size: 12px; font-weight: 700; display: block; margin-bottom: 4px;">Pincode</label>
+                                <input type="text" name="pincode" class="coupon-input" style="width: 100%;" placeholder="400001">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- STEP 2: PAYMENT METHOD -->
+                <div class="cart-items-card">
+                    <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 14px; border-bottom: 1px solid var(--border); padding-bottom: 10px;">
+                        <span style="background: var(--primary); color: #ffffff; width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 12px;">2</span>
+                        <h3 style="font-size: 16px; font-weight: 800;">Payment Method</h3>
+                    </div>
+
+                    <label class="payment-option selected">
+                        <input type="radio" name="payment_method" value="Cash on Delivery" checked>
+                        <div style="font-size: 20px;">💵</div>
+                        <div>
+                            <div style="font-weight: 700; font-size: 13px;">Cash on Delivery</div>
+                            <div style="font-size: 11px; color: var(--text-muted);">Pay upon delivery at your doorstep</div>
+                        </div>
+                    </label>
+
+                    <label class="payment-option">
+                        <input type="radio" name="payment_method" value="UPI / QR Code">
+                        <div style="font-size: 20px;">📱</div>
+                        <div>
+                            <div style="font-weight: 700; font-size: 13px;">Instant UPI / QR Code</div>
+                            <div style="font-size: 11px; color: var(--text-muted);">Google Pay, PhonePe, Paytm, BHIM</div>
+                        </div>
+                    </label>
+
+                    <label class="payment-option">
+                        <input type="radio" name="payment_method" value="Credit / Debit Card">
+                        <div style="font-size: 20px;">💳</div>
+                        <div>
+                            <div style="font-weight: 700; font-size: 13px;">Credit / Debit Card</div>
+                            <div style="font-size: 11px; color: var(--text-muted);">Visa, Mastercard, RuPay & American Express</div>
+                        </div>
+                    </label>
+
+                    <label class="payment-option">
+                        <input type="radio" name="payment_method" value="Net Banking">
+                        <div style="font-size: 20px;">🏦</div>
+                        <div>
+                            <div style="font-weight: 700; font-size: 13px;">Net Banking</div>
+                            <div style="font-size: 11px; color: var(--text-muted);">HDFC, SBI, ICICI, Axis, Kotak Bank</div>
+                        </div>
+                    </label>
+                </div>
+            </div>
+
+            <!-- RIGHT: ORDER SUMMARY -->
+            <div>
+                <div class="price-summary-card">
+                    <div class="summary-title">Summary ({{ cart_items|length }} items)</div>
+
+                    <div style="max-height: 160px; overflow-y: auto; margin-bottom: 14px; border-bottom: 1px solid var(--border); padding-bottom: 8px;">
+                        {% for item in cart_items %}
+                        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px; font-size: 12px;">
+                            <div style="display: flex; align-items: center; gap: 6px; max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                                <span>{{ item.product.image or '🛍️' }}</span>
+                                <span>{{ item.product.name }}</span>
+                            </div>
+                            <div style="font-weight: 600;">{{ item.quantity }} × ₹{{ "{:,.0f}".format(item.product.price) }}</div>
+                        </div>
+                        {% endfor %}
+                    </div>
+
+                    <div class="summary-row">
+                        <span>Subtotal</span>
+                        <span>₹{{ "{:,.2f}".format(subtotal) }}</span>
+                    </div>
+
+                    {% if coupon_discount > 0 %}
+                    <div class="summary-row discount-row">
+                        <span>Discount</span>
+                        <span>− ₹{{ "{:,.2f}".format(coupon_discount) }}</span>
+                    </div>
+                    {% endif %}
+
+                    <div class="summary-row">
+                        <span>Delivery</span>
+                        {% if delivery_fee == 0 %}
+                            <span style="color: var(--success); font-weight: 600;">Free</span>
+                        {% else %}
+                            <span>₹{{ "{:,.2f}".format(delivery_fee) }}</span>
+                        {% endif %}
+                    </div>
+
+                    <div class="summary-row">
+                        <span>Tax / GST (5%)</span>
+                        <span>₹{{ "{:,.2f}".format(tax) }}</span>
+                    </div>
+
+                    <div class="summary-total">
+                        <span>Total Payable</span>
+                        <span>₹{{ "{:,.2f}".format(grand_total) }}</span>
+                    </div>
+
+                    <button type="submit" class="btn btn-lg btn-block">
+                        Place Order →
+                    </button>
+
+                    <div style="margin-top: 12px; text-align: center; font-size: 11px; color: var(--text-muted);">
+                        Encrypted 256-Bit SSL Checkout.
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </form>
+</div>
+
+<script>
+function toggleAddressOption(radio) {
+    const newForm = document.getElementById('newAddressForm');
+    if (radio.value === 'new') {
+        newForm.style.display = 'block';
+    } else {
+        newForm.style.display = 'none';
+    }
+
+    document.querySelectorAll('.address-card').forEach(c => c.classList.remove('selected'));
+    const parentCard = radio.closest('.address-card');
+    if (parentCard) parentCard.classList.add('selected');
+}
+</script>
+{% endblock %}

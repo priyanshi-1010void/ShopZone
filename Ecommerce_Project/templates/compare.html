@@ -1,0 +1,142 @@
+{% extends "base.html" %}
+
+{% block title %}Compare Products — ShopZone{% endblock %}
+
+{% block content %}
+<div class="compare-container">
+
+    <div class="section-header" style="margin-bottom: 20px;">
+        <div>
+            <h1 class="section-title">Product Comparison</h1>
+            <p style="font-size: 13px; color: var(--text-muted); margin-top: 2px;">Compare specifications, pricing, stock and ratings side-by-side</p>
+        </div>
+        {% if products %}
+        <a href="/compare/clear" class="btn btn-sm btn-outline">Clear Comparison</a>
+        {% endif %}
+    </div>
+
+    {% if products %}
+    <div style="overflow-x: auto;">
+        <table class="compare-table">
+            <thead>
+                <tr>
+                    <th style="background: var(--bg-subtle); text-align: left; width: 180px;">Feature</th>
+                    {% for p in products %}
+                    <th style="min-width: 220px; background: #ffffff;">
+                        <div class="compare-card-head">
+                            <div class="compare-img">{{ p.image or '🛍️' }}</div>
+                            <h3 style="font-size: 13px; font-weight: 700; color: var(--text); line-height: 1.3;">{{ p.name }}</h3>
+                            <a href="{{ url_for('remove_from_compare', product_id=p.product_id) }}" style="color: var(--text-muted); font-size: 11px; text-decoration: none;">
+                                ✕ Remove
+                            </a>
+                        </div>
+                    </th>
+                    {% endfor %}
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Price & MRP -->
+                <tr>
+                    <td>Offer Price</td>
+                    {% for p in products %}
+                    <td>
+                        <span style="font-size: 18px; font-weight: 800; color: var(--text);">₹{{ "{:,.0f}".format(p.price) }}</span>
+                        <div style="font-size: 12px; color: var(--text-muted); text-decoration: line-through;">MRP: ₹{{ "{:,.0f}".format(p.original_price) }}</div>
+                        <span style="color: var(--text-secondary); font-weight: 600; font-size: 11px;">({{ p.discount_percent }}% OFF)</span>
+                    </td>
+                    {% endfor %}
+                </tr>
+
+                <!-- Category -->
+                <tr>
+                    <td>Category</td>
+                    {% for p in products %}
+                    <td>
+                        <span style="background: var(--bg-subtle); color: var(--text-secondary); border: 1px solid var(--border); font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: var(--radius-sm);">
+                            {{ p.category.category_name }}
+                        </span>
+                    </td>
+                    {% endfor %}
+                </tr>
+
+                <!-- Rating -->
+                <tr>
+                    <td>Rating</td>
+                    {% for p in products %}
+                    <td>
+                        <span class="rating-chip">★ {{ p.avg_rating }} / 5.0</span>
+                        <div style="font-size: 11px; color: var(--text-muted); margin-top: 3px;">({{ p.review_count }} ratings)</div>
+                    </td>
+                    {% endfor %}
+                </tr>
+
+                <!-- Availability -->
+                <tr>
+                    <td>Stock Availability</td>
+                    {% for p in products %}
+                    <td>
+                        {% if p.stock > 0 %}
+                            <span style="color: var(--text); font-weight: 600; font-size: 12px;">✓ In Stock ({{ p.stock }} units)</span>
+                        {% else %}
+                            <span style="color: var(--text-muted); font-weight: 600; font-size: 12px;">✕ Out of Stock</span>
+                        {% endif %}
+                    </td>
+                    {% endfor %}
+                </tr>
+
+                <!-- Delivery -->
+                <tr>
+                    <td>Delivery</td>
+                    {% for p in products %}
+                    <td>
+                        <span style="color: var(--text); font-weight: 600;">Free Delivery</span>
+                        <div style="font-size: 11px; color: var(--text-muted);">2-3 Days Estimated</div>
+                    </td>
+                    {% endfor %}
+                </tr>
+
+                <!-- Full Description / Specs -->
+                <tr>
+                    <td>Specifications</td>
+                    {% for p in products %}
+                    <td style="font-size: 12px; color: var(--text-secondary); line-height: 1.5; text-align: left;">
+                        {{ p.description }}
+                    </td>
+                    {% endfor %}
+                </tr>
+
+                <!-- Action -->
+                <tr>
+                    <td>Action</td>
+                    {% for p in products %}
+                    <td>
+                        <form action="{{ url_for('add_to_cart', product_id=p.product_id) }}" method="POST" style="margin-bottom: 6px;">
+                            <button type="submit" class="btn btn-sm btn-block" {% if p.stock == 0 %}disabled style="opacity: 0.5;"{% endif %}>
+                                Add to Bag
+                            </button>
+                        </form>
+                        <a href="{{ url_for('product_detail', product_id=p.product_id) }}" class="btn btn-sm btn-outline btn-block">
+                            View Details
+                        </a>
+                    </td>
+                    {% endfor %}
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div style="margin-top: 20px; text-align: center;">
+        <a href="/products" class="btn btn-secondary">← Add More Products to Compare</a>
+    </div>
+
+    {% else %}
+    <!-- EMPTY COMPARISON -->
+    <div style="background: #ffffff; border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 50px 20px; text-align: center; box-shadow: var(--shadow-subtle);">
+        <h3 style="font-size: 16px; font-weight: 700; margin-bottom: 4px;">Comparison List is Empty</h3>
+        <p style="color: var(--text-muted); font-size: 13px; margin-bottom: 18px;">Click "Compare" on products to inspect side-by-side specifications.</p>
+        <a href="/products" class="btn">Browse Products →</a>
+    </div>
+    {% endif %}
+
+</div>
+{% endblock %}

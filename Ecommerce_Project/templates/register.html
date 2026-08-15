@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+
+{% block title %}Create Account — ShopZone{% endblock %}
+
+{% block content %}
+<div style="min-height: 75vh; display: flex; align-items: center; justify-content: center; padding: 40px 20px;">
+    <div style="background: #ffffff; border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 36px; width: 100%; max-width: 440px; box-shadow: var(--shadow);">
+
+        <div style="text-align: center; margin-bottom: 22px;">
+            <h2 style="font-size: 20px; font-weight: 800; color: var(--text);">Create an Account</h2>
+            <p style="font-size: 13px; color: var(--text-muted); margin-top: 2px;">Join ShopZone for seamless order tracking and discounts</p>
+        </div>
+
+        <form action="/register" method="POST">
+            <div style="margin-bottom: 12px;">
+                <label style="display: block; font-size: 12px; font-weight: 700; margin-bottom: 4px; color: var(--text);">Full Name</label>
+                <input type="text" name="name" class="coupon-input" style="width: 100%;" placeholder="e.g. Rahul Sharma" value="{{ name or '' }}" required>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1.2fr 1fr; gap: 10px; margin-bottom: 12px;">
+                <div>
+                    <label style="display: block; font-size: 12px; font-weight: 700; margin-bottom: 4px; color: var(--text);">Email</label>
+                    <input type="email" name="email" class="coupon-input" style="width: 100%;" placeholder="rahul@gmail.com" value="{{ email or '' }}" required>
+                </div>
+                <div>
+                    <label style="display: block; font-size: 12px; font-weight: 700; margin-bottom: 4px; color: var(--text);">Phone</label>
+                    <input type="tel" name="phone" class="coupon-input" style="width: 100%;" placeholder="9876543210" value="{{ phone or '' }}" required>
+                </div>
+            </div>
+
+            <div style="margin-bottom: 12px;">
+                <label style="display: block; font-size: 12px; font-weight: 700; margin-bottom: 4px; color: var(--text);">Password</label>
+                <input type="password" name="password" class="coupon-input" style="width: 100%;" placeholder="At least 6 characters" required minlength="6">
+            </div>
+
+            <div style="margin-bottom: 20px;">
+                <label style="display: block; font-size: 12px; font-weight: 700; margin-bottom: 4px; color: var(--text);">Confirm Password</label>
+                <input type="password" name="confirm_password" class="coupon-input" style="width: 100%;" placeholder="Re-enter password" required minlength="6">
+            </div>
+
+            <button type="submit" class="btn btn-block btn-lg">
+                Create Account →
+            </button>
+        </form>
+
+        <div style="text-align: center; margin-top: 20px; font-size: 13px; color: var(--text-muted);">
+            Already have an account? <a href="/login" style="color: var(--text); font-weight: 700; text-decoration: underline;">Sign In</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

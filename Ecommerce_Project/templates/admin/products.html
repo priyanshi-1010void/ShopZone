@@ -1,0 +1,243 @@
+{% extends "admin/admin_base.html" %}
+
+{% block title %}Products & Categories — ShopZone Admin{% endblock %}
+
+{% block content %}
+<div class="admin-header">
+    <div>
+        <h1 class="admin-title">Products & Categories</h1>
+        <p style="color: var(--text-muted); font-size: 13px; margin-top: 2px;">Manage storefront inventory, pricing, stock levels and categories</p>
+    </div>
+    <div style="display: flex; gap: 10px;">
+        <button type="button" class="btn btn-sm" onclick="document.getElementById('addProductBox').style.display = 'block'">
+            + New Product
+        </button>
+        <button type="button" class="btn btn-sm btn-secondary" onclick="document.getElementById('addCategoryBox').style.display = 'block'">
+            + New Category
+        </button>
+    </div>
+</div>
+
+<!-- ADD PRODUCT FORM BOX -->
+<div id="addProductBox" style="display: none; background: #ffffff; border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 22px; margin-bottom: 22px; box-shadow: var(--shadow);">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; border-bottom: 1px solid var(--border); padding-bottom: 8px;">
+        <h3 style="font-size: 15px; font-weight: 800; color: var(--text);">Add New Product</h3>
+        <button type="button" class="alert-close" onclick="document.getElementById('addProductBox').style.display = 'none'">&times;</button>
+    </div>
+
+    <form action="/admin/product/add" method="POST">
+        <div style="display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 12px; margin-bottom: 12px;">
+            <div>
+                <label style="display: block; font-size: 12px; font-weight: 700; margin-bottom: 4px;">Product Title</label>
+                <input type="text" name="name" class="coupon-input" placeholder="e.g. Minimalist Mechanical Keyboard" required>
+            </div>
+            <div>
+                <label style="display: block; font-size: 12px; font-weight: 700; margin-bottom: 4px;">Category</label>
+                <select name="category_id" class="sort-select" style="width: 100%;" required>
+                    {% for cat in categories %}
+                    <option value="{{ cat.category_id }}">{{ cat.category_name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div>
+                <label style="display: block; font-size: 12px; font-weight: 700; margin-bottom: 4px;">Price (₹)</label>
+                <input type="number" step="0.01" name="price" class="coupon-input" placeholder="1499.00" required>
+            </div>
+            <div>
+                <label style="display: block; font-size: 12px; font-weight: 700; margin-bottom: 4px;">Stock Units</label>
+                <input type="number" name="stock" class="coupon-input" placeholder="25" required>
+            </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 4fr; gap: 12px; margin-bottom: 16px;">
+            <div>
+                <label style="display: block; font-size: 12px; font-weight: 700; margin-bottom: 4px;">Emoji Icon</label>
+                <input type="text" name="image" class="coupon-input" style="text-align: center; font-size: 18px;" value="🛍️">
+            </div>
+            <div>
+                <label style="display: block; font-size: 12px; font-weight: 700; margin-bottom: 4px;">Description</label>
+                <input type="text" name="description" class="coupon-input" placeholder="Product specifications, materials, warranty..." required>
+            </div>
+        </div>
+
+        <div style="display: flex; justify-content: flex-end; gap: 8px;">
+            <button type="button" class="btn btn-sm btn-secondary" onclick="document.getElementById('addProductBox').style.display = 'none'">Cancel</button>
+            <button type="submit" class="btn btn-sm">Save & Publish</button>
+        </div>
+    </form>
+</div>
+
+<!-- ADD CATEGORY BOX -->
+<div id="addCategoryBox" style="display: none; background: #ffffff; border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 22px; margin-bottom: 22px; box-shadow: var(--shadow);">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; border-bottom: 1px solid var(--border); padding-bottom: 8px;">
+        <h3 style="font-size: 15px; font-weight: 800; color: var(--text);">Add New Category</h3>
+        <button type="button" class="alert-close" onclick="document.getElementById('addCategoryBox').style.display = 'none'">&times;</button>
+    </div>
+    <form action="/admin/category/add" method="POST" style="display: flex; gap: 10px; align-items: flex-end;">
+        <div style="flex: 1;">
+            <label style="display: block; font-size: 12px; font-weight: 700; margin-bottom: 4px;">Category Name</label>
+            <input type="text" name="category_name" class="coupon-input" placeholder="e.g. Workspace Essentials" required>
+        </div>
+        <div style="flex: 2;">
+            <label style="display: block; font-size: 12px; font-weight: 700; margin-bottom: 4px;">Description</label>
+            <input type="text" name="description" class="coupon-input" placeholder="Short description">
+        </div>
+        <button type="submit" class="btn btn-sm">Create Category</button>
+    </form>
+</div>
+
+<!-- PRODUCTS TABLE CARD -->
+<div class="admin-card">
+    <h3 style="font-size: 15px; font-weight: 800; color: var(--text); margin-bottom: 14px;">
+        Product Catalog ({{ products|length }} items)
+    </h3>
+
+    <table class="admin-table">
+        <thead>
+            <tr>
+                <th>Icon</th>
+                <th>Product Details</th>
+                <th>Category</th>
+                <th>Price</th>
+                <th>Stock Level</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for p in products %}
+            <tr>
+                <td style="font-size: 22px;">{{ p.image or '🛍️' }}</td>
+                <td style="font-weight: 600;">
+                    <div>{{ p.name }}</div>
+                    <div style="font-size: 11px; color: var(--text-muted); font-weight: 400; max-width: 280px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                        {{ p.description }}
+                    </div>
+                </td>
+                <td>
+                    <span style="background: var(--bg-subtle); color: var(--text-secondary); border: 1px solid var(--border); font-size: 11px; font-weight: 600; padding: 2px 7px; border-radius: var(--radius-sm);">
+                        {{ p.category.category_name }}
+                    </span>
+                </td>
+                <td style="font-weight: 700;">₹{{ "{:,.2f}".format(p.price) }}</td>
+                <td>
+                    {% if p.stock > 10 %}
+                        <span style="color: var(--success); font-weight: 600;">{{ p.stock }} units</span>
+                    {% elif p.stock > 0 %}
+                        <span style="color: var(--warning); font-weight: 600;">{{ p.stock }} units</span>
+                    {% else %}
+                        <span style="color: var(--danger); font-weight: 600;">Out of Stock</span>
+                    {% endif %}
+                </td>
+                <td>
+                    <div style="display: flex; gap: 6px;">
+                        <button type="button" class="btn btn-sm btn-secondary" onclick="openEditModal({{ p.product_id }}, '{{ p.name|replace("'", "\\'") }}', {{ p.category_id }}, {{ p.price }}, {{ p.stock }}, '{{ p.image }}', '{{ p.description|replace("'", "\\'") }}')">
+                            Edit
+                        </button>
+                        <form action="{{ url_for('admin_delete_product', product_id=p.product_id) }}" method="POST" onsubmit="return confirm('Delete this product?');">
+                            <button type="submit" class="btn btn-sm btn-danger">Delete</button>
+                        </form>
+                    </div>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<!-- CATEGORY DIRECTORY CARD -->
+<div class="admin-card" style="margin-top: 20px;">
+    <h3 style="font-size: 15px; font-weight: 800; color: var(--text); margin-bottom: 14px;">
+        Store Categories ({{ categories|length }})
+    </h3>
+    <table class="admin-table">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Category Name</th>
+                <th>Description</th>
+                <th>Products Count</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for cat in categories %}
+            <tr>
+                <td>#{{ cat.category_id }}</td>
+                <td style="font-weight: 600;">{{ cat.category_name }}</td>
+                <td style="color: var(--text-muted);">{{ cat.description or '-' }}</td>
+                <td>{{ cat.products|length }} products</td>
+                <td>
+                    <form action="{{ url_for('admin_delete_category', category_id=cat.category_id) }}" method="POST" onsubmit="return confirm('Delete this category?');">
+                        <button type="submit" class="btn btn-sm btn-danger" {% if cat.products %}disabled title="Category contains active products"{% endif %}>
+                            Delete
+                        </button>
+                    </form>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<!-- EDIT PRODUCT MODAL -->
+<div id="editModal" style="display: none; position: fixed; inset: 0; background: rgba(15, 23, 42, 0.4); backdrop-filter: blur(4px); z-index: 9999; align-items: center; justify-content: center; padding: 20px;">
+    <div style="background: #ffffff; border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 28px; width: 100%; max-width: 540px; box-shadow: var(--shadow-lg);">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; border-bottom: 1px solid var(--border); padding-bottom: 8px;">
+            <h3 style="font-size: 16px; font-weight: 800; color: var(--text);">Edit Product Details</h3>
+            <button type="button" class="alert-close" onclick="document.getElementById('editModal').style.display = 'none'">&times;</button>
+        </div>
+
+        <form id="editForm" method="POST">
+            <div style="margin-bottom: 12px;">
+                <label style="display: block; font-size: 12px; font-weight: 700; margin-bottom: 4px;">Product Name</label>
+                <input type="text" id="editName" name="name" class="coupon-input" style="width: 100%;" required>
+            </div>
+            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 12px;">
+                <div>
+                    <label style="display: block; font-size: 12px; font-weight: 700; margin-bottom: 4px;">Category</label>
+                    <select id="editCat" name="category_id" class="sort-select" style="width: 100%;" required>
+                        {% for cat in categories %}
+                        <option value="{{ cat.category_id }}">{{ cat.category_name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div>
+                    <label style="display: block; font-size: 12px; font-weight: 700; margin-bottom: 4px;">Price (₹)</label>
+                    <input type="number" step="0.01" id="editPrice" name="price" class="coupon-input" style="width: 100%;" required>
+                </div>
+                <div>
+                    <label style="display: block; font-size: 12px; font-weight: 700; margin-bottom: 4px;">Stock Units</label>
+                    <input type="number" id="editStock" name="stock" class="coupon-input" style="width: 100%;" required>
+                </div>
+            </div>
+            <div style="display: grid; grid-template-columns: 1fr 3fr; gap: 10px; margin-bottom: 18px;">
+                <div>
+                    <label style="display: block; font-size: 12px; font-weight: 700; margin-bottom: 4px;">Emoji Icon</label>
+                    <input type="text" id="editImage" name="image" class="coupon-input" style="width: 100%; text-align: center;">
+                </div>
+                <div>
+                    <label style="display: block; font-size: 12px; font-weight: 700; margin-bottom: 4px;">Description</label>
+                    <input type="text" id="editDesc" name="description" class="coupon-input" style="width: 100%;" required>
+                </div>
+            </div>
+            <div style="display: flex; justify-content: flex-end; gap: 8px;">
+                <button type="button" class="btn btn-sm btn-secondary" onclick="document.getElementById('editModal').style.display = 'none'">Cancel</button>
+                <button type="submit" class="btn btn-sm">Update Product</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+function openEditModal(id, name, catId, price, stock, image, desc) {
+    document.getElementById('editForm').action = '/admin/product/edit/' + id;
+    document.getElementById('editName').value = name;
+    document.getElementById('editCat').value = catId;
+    document.getElementById('editPrice').value = price;
+    document.getElementById('editStock').value = stock;
+    document.getElementById('editImage').value = image || '🛍️';
+    document.getElementById('editDesc').value = desc;
+    document.getElementById('editModal').style.display = 'flex';
+}
+</script>
+{% endblock %}

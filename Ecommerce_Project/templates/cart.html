@@ -1,0 +1,142 @@
+{% extends "base.html" %}
+
+{% block title %}Shopping Bag — ShopZone{% endblock %}
+
+{% block content %}
+<div class="cart-grid-layout">
+
+    <!-- LEFT: CART ITEMS LIST -->
+    <div>
+        <div class="section-header" style="margin-bottom: 16px;">
+            <h1 class="section-title">Shopping Bag ({{ cart_items|length }})</h1>
+            <a href="/products" class="section-link">← Continue Shopping</a>
+        </div>
+
+        {% if cart_items %}
+        <div class="cart-items-card">
+            {% for item in cart_items %}
+            <div class="cart-item-row">
+                <div class="cart-item-emoji">{{ item.product.image or '🛍️' }}</div>
+
+                <div>
+                    <a href="{{ url_for('product_detail', product_id=item.product.product_id) }}" style="font-weight: 700; font-size: 14px; color: var(--text); text-decoration: none;">
+                        {{ item.product.name }}
+                    </a>
+                    <div style="font-size: 12px; color: var(--text-muted); margin-top: 2px;">
+                        Category: {{ item.product.category.category_name }}
+                    </div>
+                    <div style="margin-top: 4px; display: flex; align-items: baseline; gap: 8px;">
+                        <span style="font-weight: 700; font-size: 15px; color: var(--text);">₹{{ "{:,.0f}".format(item.product.price) }}</span>
+                        <span style="font-size: 12px; color: var(--text-muted); text-decoration: line-through;">₹{{ "{:,.0f}".format(item.product.original_price) }}</span>
+                        <span style="color: var(--success); font-weight: 600; font-size: 12px;">{{ item.product.discount_percent }}% off</span>
+                    </div>
+                </div>
+
+                <!-- Quantity Form -->
+                <div>
+                    <form action="{{ url_for('update_cart', item_id=item.cart_item_id) }}" method="POST" class="auto-submit-form">
+                        <div class="qty-stepper" style="height: 32px;">
+                            <button type="button" class="qty-btn qty-minus" style="height: 32px; width: 28px;">−</button>
+                            <input type="number" name="quantity" class="qty-input" value="{{ item.quantity }}" min="1" max="{{ item.product.stock }}" style="height: 32px; width: 36px; font-size: 13px;" readonly>
+                            <button type="button" class="qty-btn qty-plus" style="height: 32px; width: 28px;">+</button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Subtotal -->
+                <div style="font-size: 14px; font-weight: 700; color: var(--text);">
+                    ₹{{ "{:,.0f}".format(item.product.price * item.quantity) }}
+                </div>
+
+                <!-- Remove Button -->
+                <div>
+                    <form action="{{ url_for('remove_from_cart', item_id=item.cart_item_id) }}" method="POST">
+                        <button type="submit" style="background: none; border: none; font-size: 16px; cursor: pointer; color: var(--text-muted); padding: 4px;" title="Remove from cart">
+                            ✕
+                        </button>
+                    </form>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <!-- EMPTY CART -->
+        <div style="background: #ffffff; border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 50px 20px; text-align: center; box-shadow: var(--shadow-subtle);">
+            <h2 style="font-size: 18px; font-weight: 700; margin-bottom: 6px;">Your bag is empty</h2>
+            <p style="color: var(--text-muted); font-size: 13px; margin-bottom: 20px;">Browse our catalog and add products to start shopping.</p>
+            <a href="/products" class="btn">Browse Catalog →</a>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- RIGHT: PRICE DETAILS -->
+    {% if cart_items %}
+    <div>
+        <div class="price-summary-card">
+            <div class="summary-title">Summary</div>
+
+            <div class="summary-row">
+                <span>Items Subtotal</span>
+                <span>₹{{ "{:,.2f}".format(mrp_total) }}</span>
+            </div>
+
+            <div class="summary-row discount-row">
+                <span>Discount</span>
+                <span>− ₹{{ "{:,.2f}".format(discount) }}</span>
+            </div>
+
+            {% if coupon_discount > 0 %}
+            <div class="summary-row discount-row">
+                <span>Coupon ({{ coupon_code }})</span>
+                <span>− ₹{{ "{:,.2f}".format(coupon_discount) }}</span>
+            </div>
+            {% endif %}
+
+            <div class="summary-row">
+                <span>Delivery</span>
+                {% if delivery_fee == 0 %}
+                    <span style="color: var(--success); font-weight: 600;">Free</span>
+                {% else %}
+                    <span>₹{{ "{:,.2f}".format(delivery_fee) }}</span>
+                {% endif %}
+            </div>
+
+            <div class="summary-row">
+                <span>GST (5%)</span>
+                <span>₹{{ "{:,.2f}".format(tax) }}</span>
+            </div>
+
+            <div class="summary-total">
+                <span>Total</span>
+                <span>₹{{ "{:,.2f}".format(grand_total) }}</span>
+            </div>
+
+            <div class="savings-alert">
+                Total savings on this order: ₹{{ "{:,.2f}".format(discount + coupon_discount) }}
+            </div>
+
+            <!-- COUPON INPUT BOX -->
+            <form action="/apply-coupon" method="POST" style="margin-bottom: 18px;">
+                <label style="font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase;">Promo Code</label>
+                <div class="coupon-box">
+                    <input type="text" id="couponCodeInput" name="coupon_code" class="coupon-input" placeholder="e.g. SAVE10" value="{{ coupon_code }}">
+                    <button type="submit" class="btn btn-sm btn-secondary">Apply</button>
+                </div>
+                <div style="font-size: 11px; color: var(--text-muted);">
+                    Codes: <a href="javascript:void(0);" onclick="applyCouponCode('SAVE10')" style="color: var(--text); font-weight: 600;">SAVE10</a>, <a href="javascript:void(0);" onclick="applyCouponCode('SHOPZONE20')" style="color: var(--text); font-weight: 600;">SHOPZONE20</a>
+                </div>
+            </form>
+
+            <a href="/checkout" class="btn btn-lg btn-block">
+                Proceed to Checkout →
+            </a>
+
+            <div style="margin-top: 12px; text-align: center; font-size: 11px; color: var(--text-muted);">
+                Complimentary 7-day returns on all orders.
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+</div>
+{% endblock %}

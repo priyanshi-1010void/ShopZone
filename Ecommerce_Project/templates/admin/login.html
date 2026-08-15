@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Portal Login — ShopZone Command Center</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body style="background: var(--bg-main); display: flex; align-items: center; justify-content: center; min-height: 100vh; padding: 20px;">
+
+    <div style="background: #ffffff; border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 36px; width: 100%; max-width: 420px; box-shadow: var(--shadow);">
+
+        <div style="text-align: center; margin-bottom: 24px;">
+            <div style="font-size: 32px; margin-bottom: 8px;">🛡️</div>
+            <h1 style="font-size: 20px; font-weight: 800; color: var(--text);">Admin Portal</h1>
+            <p style="font-size: 13px; color: var(--text-muted); margin-top: 2px;">Sign in to access store administration & analytics</p>
+        </div>
+
+        <!-- FLASH NOTIFICATIONS -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }}">
+                        <div>{{ message }}</div>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <!-- 1-CLICK QUICK ADMIN AUTOFILL -->
+        <div style="background: var(--bg-subtle); border: 1px dashed var(--border); border-radius: var(--radius-sm); padding: 12px; margin-bottom: 20px; text-align: center;">
+            <div style="font-size: 11px; color: var(--text-muted); font-weight: 700; text-transform: uppercase; margin-bottom: 6px;">
+                Demo Credentials
+            </div>
+            <button type="button" class="btn btn-sm btn-secondary" onclick="fillAdmin()" style="width: 100%; font-size: 12px;">
+                Fill: admin@shop.com / admin123
+            </button>
+        </div>
+
+        <form action="/admin/login" method="POST">
+            <div style="margin-bottom: 14px;">
+                <label style="display: block; font-size: 13px; font-weight: 700; color: var(--text); margin-bottom: 4px;">Admin Email</label>
+                <input type="email" id="adminEmail" name="email" class="coupon-input" style="width: 100%; text-transform: none;" placeholder="admin@shop.com" required>
+            </div>
+
+            <div style="margin-bottom: 20px;">
+                <label style="display: block; font-size: 13px; font-weight: 700; color: var(--text); margin-bottom: 4px;">Password</label>
+                <input type="password" id="adminPass" name="password" class="coupon-input" style="width: 100%; text-transform: none;" placeholder="••••••••" required>
+            </div>
+
+            <button type="submit" class="btn btn-lg btn-block">
+                Sign In to Dashboard →
+            </button>
+        </form>
+
+        <div style="text-align: center; margin-top: 20px; font-size: 12px;">
+            <a href="/" style="color: var(--text-muted); text-decoration: none;">← Return to Storefront</a>
+        </div>
+    </div>
+
+    <script>
+    function fillAdmin() {
+        document.getElementById('adminEmail').value = 'admin@shop.com';
+        document.getElementById('adminPass').value = 'admin123';
+    }
+    </script>
+</body>
+</html>

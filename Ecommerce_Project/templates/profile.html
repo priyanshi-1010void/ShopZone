@@ -1,0 +1,130 @@
+{% extends "base.html" %}
+
+{% block title %}Account Settings — ShopZone{% endblock %}
+
+{% block content %}
+<div class="section-wrapper" style="max-width: 960px; margin: 28px auto;">
+
+    <!-- PROFILE HERO CARD (Clean Light Minimal) -->
+    <div style="background: #ffffff; border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 28px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 16px; box-shadow: var(--shadow-subtle); margin-bottom: 20px;">
+        <div style="display: flex; align-items: center; gap: 16px;">
+            <div style="width: 56px; height: 56px; background: var(--bg-subtle); color: var(--text); border: 1px solid var(--border); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 22px; font-weight: 800;">
+                {{ user.name[0]|upper }}
+            </div>
+            <div>
+                <h1 style="font-size: 20px; font-weight: 800; color: var(--text); margin-bottom: 2px;">{{ user.name }}</h1>
+                <div style="font-size: 12px; color: var(--text-muted); display: flex; gap: 12px;">
+                    <span>{{ user.email }}</span>
+                    <span>•</span>
+                    <span>{{ user.phone or 'No phone number' }}</span>
+                </div>
+            </div>
+        </div>
+
+        <div style="display: flex; gap: 8px;">
+            <a href="/my-orders" class="btn btn-sm btn-secondary">My Orders</a>
+            <a href="/logout" class="btn btn-sm btn-outline">Sign Out</a>
+        </div>
+    </div>
+
+    <!-- STATS COUNTER -->
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 14px; margin-bottom: 22px;">
+        <div style="background: #ffffff; border: 1px solid var(--border); border-radius: var(--radius); padding: 16px; text-align: center; box-shadow: var(--shadow-subtle);">
+            <div style="font-size: 22px; font-weight: 800; color: var(--text);">{{ order_count }}</div>
+            <div style="font-size: 12px; color: var(--text-muted); font-weight: 600; margin-top: 2px;">Total Orders</div>
+        </div>
+        <div style="background: #ffffff; border: 1px solid var(--border); border-radius: var(--radius); padding: 16px; text-align: center; box-shadow: var(--shadow-subtle);">
+            <div style="font-size: 22px; font-weight: 800; color: var(--text);">{{ addresses|length }}</div>
+            <div style="font-size: 12px; color: var(--text-muted); font-weight: 600; margin-top: 2px;">Saved Addresses</div>
+        </div>
+        <div style="background: #ffffff; border: 1px solid var(--border); border-radius: var(--radius); padding: 16px; text-align: center; box-shadow: var(--shadow-subtle);">
+            <div style="font-size: 22px; font-weight: 800; color: var(--text);">{{ review_count }}</div>
+            <div style="font-size: 12px; color: var(--text-muted); font-weight: 600; margin-top: 2px;">Reviews Written</div>
+        </div>
+    </div>
+
+    <!-- TWO-COLUMN LAYOUT -->
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+
+        <!-- LEFT: EDIT PROFILE -->
+        <div style="background: #ffffff; border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 24px; box-shadow: var(--shadow-subtle);">
+            <h3 style="font-size: 15px; font-weight: 800; margin-bottom: 14px; border-bottom: 1px solid var(--border); padding-bottom: 8px;">
+                Account Details
+            </h3>
+
+            <form action="/profile/update" method="POST">
+                <div style="margin-bottom: 12px;">
+                    <label style="font-size: 12px; font-weight: 700; display: block; margin-bottom: 4px;">Full Name</label>
+                    <input type="text" name="name" class="coupon-input" style="width: 100%;" value="{{ user.name }}" required>
+                </div>
+
+                <div style="margin-bottom: 12px;">
+                    <label style="font-size: 12px; font-weight: 700; display: block; margin-bottom: 4px;">Email (Read-only)</label>
+                    <input type="email" class="coupon-input" style="width: 100%; background: var(--bg-subtle);" value="{{ user.email }}" readonly>
+                </div>
+
+                <div style="margin-bottom: 12px;">
+                    <label style="font-size: 12px; font-weight: 700; display: block; margin-bottom: 4px;">Phone Number</label>
+                    <input type="tel" name="phone" class="coupon-input" style="width: 100%;" value="{{ user.phone or '' }}" placeholder="9876543210">
+                </div>
+
+                <div style="margin-bottom: 16px;">
+                    <label style="font-size: 12px; font-weight: 700; display: block; margin-bottom: 4px;">New Password (Optional)</label>
+                    <input type="password" name="new_password" class="coupon-input" style="width: 100%;" placeholder="Leave blank to keep unchanged">
+                </div>
+
+                <button type="submit" class="btn btn-block">
+                    Save Changes
+                </button>
+            </form>
+        </div>
+
+        <!-- RIGHT: SAVED ADDRESSES -->
+        <div style="background: #ffffff; border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 24px; box-shadow: var(--shadow-subtle);">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; border-bottom: 1px solid var(--border); padding-bottom: 8px;">
+                <h3 style="font-size: 15px; font-weight: 800;">Address Book</h3>
+                <button type="button" class="btn btn-sm btn-outline" onclick="document.getElementById('addAddrBox').style.display = document.getElementById('addAddrBox').style.display === 'none' ? 'block' : 'none'">
+                    + Add New
+                </button>
+            </div>
+
+            <!-- ADD ADDRESS INLINE FORM -->
+            <div id="addAddrBox" style="display: none; background: var(--bg-subtle); border: 1px dashed var(--border); border-radius: var(--radius); padding: 14px; margin-bottom: 16px;">
+                <form action="/address/add" method="POST">
+                    <div style="margin-bottom: 8px;">
+                        <label style="font-size: 11px; font-weight: 700; display: block; margin-bottom: 3px;">Street Address</label>
+                        <input type="text" name="address_line" class="coupon-input" style="width: 100%; font-size: 12px;" required placeholder="Flat, Building, Street">
+                    </div>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 6px; margin-bottom: 10px;">
+                        <input type="text" name="city" class="coupon-input" style="font-size: 12px;" placeholder="City" required>
+                        <input type="text" name="state" class="coupon-input" style="font-size: 12px;" placeholder="State" required>
+                        <input type="text" name="pincode" class="coupon-input" style="font-size: 12px;" placeholder="Pincode" required>
+                    </div>
+                    <button type="submit" class="btn btn-sm btn-block">Save Address</button>
+                </form>
+            </div>
+
+            <!-- ADDRESSES LIST -->
+            {% if addresses %}
+                <div style="display: flex; flex-direction: column; gap: 10px;">
+                    {% for addr in addresses %}
+                    <div style="border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 12px; display: flex; justify-content: space-between; align-items: flex-start;">
+                        <div>
+                            <div style="font-size: 12px; font-weight: 700; color: var(--text);">{{ addr.address_line }}</div>
+                            <div style="font-size: 11px; color: var(--text-muted);">{{ addr.city }}, {{ addr.state }} - {{ addr.pincode }}</div>
+                        </div>
+                        <form action="{{ url_for('delete_address', address_id=addr.address_id) }}" method="POST">
+                            <button type="submit" style="background: none; border: none; color: var(--text-muted); font-size: 14px; cursor: pointer;" title="Delete address">✕</button>
+                        </form>
+                    </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <p style="color: var(--text-muted); font-size: 12px; text-align: center; padding: 16px;">No saved delivery addresses found.</p>
+            {% endif %}
+        </div>
+
+    </div>
+
+</div>
+{% endblock %}

@@ -1,0 +1,132 @@
+{% extends "admin/admin_base.html" %}
+
+{% block title %}Dashboard Overview — ShopZone Admin{% endblock %}
+
+{% block content %}
+<!-- HEADER -->
+<div class="admin-header">
+    <div>
+        <h1 class="admin-title">Dashboard Overview</h1>
+        <p style="color: var(--text-muted); font-size: 13px; margin-top: 2px;">Real-time performance indicators, orders & inventory status</p>
+    </div>
+    <div style="display: flex; gap: 10px;">
+        <a href="/admin/products" class="btn btn-sm btn-secondary">Catalog Management</a>
+        <a href="/admin/orders" class="btn btn-sm">Process Orders</a>
+    </div>
+</div>
+
+<!-- METRICS CARDS -->
+<div class="metric-grid">
+    <div class="metric-card">
+        <div>
+            <div class="metric-label">Store Revenue</div>
+            <div class="metric-value">₹{{ "{:,.2f}".format(total_revenue) }}</div>
+        </div>
+        <div class="metric-icon">💳</div>
+    </div>
+
+    <div class="metric-card">
+        <div>
+            <div class="metric-label">Total Orders</div>
+            <div class="metric-value">{{ total_orders }}</div>
+        </div>
+        <div class="metric-icon">📦</div>
+    </div>
+
+    <div class="metric-card">
+        <div>
+            <div class="metric-label">Active Products</div>
+            <div class="metric-value">{{ total_products }}</div>
+        </div>
+        <div class="metric-icon">🛍️</div>
+    </div>
+
+    <div class="metric-card">
+        <div>
+            <div class="metric-label">Registered Shoppers</div>
+            <div class="metric-value">{{ total_customers }}</div>
+        </div>
+        <div class="metric-icon">👥</div>
+    </div>
+</div>
+
+<!-- TWO-COLUMN SECTION -->
+<div style="display: grid; grid-template-columns: 1.3fr 0.9fr; gap: 20px;">
+
+    <!-- RECENT ORDERS TABLE -->
+    <div class="admin-card">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+            <h3 style="font-size: 15px; font-weight: 800; color: var(--text);">Recent Orders</h3>
+            <a href="/admin/orders" style="color: var(--text-secondary); font-size: 12px; text-decoration: none; font-weight: 600;">View All →</a>
+        </div>
+
+        {% if recent_orders %}
+        <table class="admin-table">
+            <thead>
+                <tr>
+                    <th>Order</th>
+                    <th>Customer</th>
+                    <th>Date</th>
+                    <th>Total</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for o in recent_orders %}
+                <tr>
+                    <td style="font-weight: 700;">#SZ-{{ o.order_id }}</td>
+                    <td>{{ o.user.name }}</td>
+                    <td style="color: var(--text-muted); font-size: 12px;">{{ o.order_date.strftime('%d %b, %H:%M') if o.order_date else '-' }}</td>
+                    <td style="font-weight: 700;">₹{{ "{:,.0f}".format(o.total_amount) }}</td>
+                    <td>
+                        <span class="status-pill status-{{ o.status.replace(' ', '_') }}">
+                            {{ o.status }}
+                        </span>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <p style="color: var(--text-muted); font-size: 13px; text-align: center; padding: 24px;">No customer orders placed yet.</p>
+        {% endif %}
+    </div>
+
+    <!-- LOW STOCK ALERTS -->
+    <div class="admin-card">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+            <h3 style="font-size: 15px; font-weight: 800; color: var(--text);">Inventory Restock Alerts</h3>
+            <a href="/admin/products" style="color: var(--text-secondary); font-size: 12px; text-decoration: none; font-weight: 600;">Restock →</a>
+        </div>
+
+        {% if low_stock_products %}
+        <table class="admin-table">
+            <thead>
+                <tr>
+                    <th>Product</th>
+                    <th>Stock</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for lp in low_stock_products %}
+                <tr>
+                    <td style="display: flex; align-items: center; gap: 8px;">
+                        <span>{{ lp.image or '🛍️' }}</span>
+                        <span style="max-width: 170px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{ lp.name }}</span>
+                    </td>
+                    <td>
+                        <span style="background: var(--warning-bg); color: var(--warning); border: 1px solid var(--warning-border); font-weight: 700; padding: 2px 7px; border-radius: var(--radius-sm); font-size: 11px;">
+                            {{ lp.stock }} left
+                        </span>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <p style="color: var(--success); font-size: 13px; text-align: center; padding: 24px;">✓ All catalog inventory levels are healthy.</p>
+        {% endif %}
+    </div>
+
+</div>
+{% endblock %}
